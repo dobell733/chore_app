@@ -1,0 +1,68 @@
+.chore-card-exterior {
+  background-color: #FF6B6B;
+  padding: 10px;
+  border-radius: 10px;
+  height: 270px; 
+  width: 200px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: box-shadow 0.3s ease;
+}
+
+.chore-card-exterior:hover {
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.chore-card-interior {
+  background-color: #F7FFF7;
+  color: #1A535C;
+  height: 250px;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+.chore-card-interior h5 {
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+}
+
+.chore-card-interior p {
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+}
+
+.chore_button {
+  background-color: #4ECDC4;
+  color: #F7FFF7;
+  padding: 10px 9px;  /* Increased padding for easier tapping */
+  border-radius: 10px;  /* Rounded corners */
+  font-size: 18px;  /* Larger text */
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+.chore_button.enabled:hover {
+  background-color: #47C8BF;
+}
+
+.chore_button.enabled:active {
+  background-color: #41C4BB;
+  transform: scale(0.95);
+}
+
+.chore_button.enabled {
+  background-color: #4ECDC4;
+}
+
+.chore_button.disabled {
+  background-color: #FF6B6B;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -1,0 +1,32 @@
+.main_page_container {
+    display: flex;
+    justify-content: center;
+    background-color: #F7FFF7;
+    min-height: 100vh;
+}
+
+.child_title {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    color: #1A535C;
+    font-size: 40px;
+    font-weight: 800;
+}
+
+@media screen and (max-width: 1200px) {
+    .main {
+        width: 800px;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .main {
+        width: 500px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .main {
+        width: 420px;
+    }
+}

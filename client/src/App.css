@@ -1,0 +1,11 @@
+
+
+.content {
+    flex: 1;
+    background-color: #F7FFF7;
+}
+  
+.footer {
+    flex-shrink: 0;
+    text-align: center;
+}

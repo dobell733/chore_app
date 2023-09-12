@@ -1,0 +1,36 @@
+.child_card {
+    font-size: 24px;
+    cursor: pointer;
+    background-color: #4ECDC4;
+    color: #F7FFF7; 
+    border-radius: 15px;
+    margin-bottom: 50px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: box-shadow 0.3s ease; 
+}
+
+.child_card:hover {
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* Darker shadow on hover */
+}
+
+.child_content {
+    color: #1A535C;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #F7FFF7;
+    width: 97%;
+    height: 83%;
+    border-radius: 10px;
+}
+
+.child_content h3 {
+    font-weight: 600;
+    font-size: 40px;
+}

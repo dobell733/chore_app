@@ -1,0 +1,51 @@
+.main_page_container {
+    background-color: #F7FFF7;
+    color: #1A535C;
+    font-family: 'Roboto', sans-serif;
+}
+
+.main {
+    width: 1200px;
+}
+
+.chore_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 20px;
+}
+
+.dummy_chore_card {
+    padding: 10px;
+    margin: 10px 0px 10px 0px;
+    height: 250px; /* Set a fixed height */
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute the space evenly */    
+}
+
+.chore_title {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-weight: 800;
+}
+
+@media screen and (max-width: 1200px) {
+    .main {
+        width: 800px;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .main {
+        width: 500px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .main {
+        width: 420px;
+    }
+}

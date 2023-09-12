@@ -1,0 +1,12 @@
+footer {
+    margin: 0 auto;
+    padding: 5px 0 10px 0;
+    color: #F7FFF7;
+    background-color: #1A535C;
+}
+
+p {
+    margin: 0;
+    font-weight: 500;
+    padding-top: 22px;
+}

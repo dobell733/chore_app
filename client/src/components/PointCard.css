@@ -1,0 +1,102 @@
+.point_card {
+    padding: 10px;
+    border-radius: 10px;
+    margin: 50px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: box-shadow 0.3s ease; 
+    height: 200px;
+}
+
+.point_card.green {
+    background-color: #4ECDC4;
+}
+
+.point_card.red {
+    background-color: #FF6B6B;
+}
+
+.point_card:hover {
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.text_container {
+    background-color: #F7FFF7;
+    padding: 20px;
+    height: 180px;
+    width: 78%;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.text_container h3,
+.text_container h4,
+.text_container p {
+    font-weight: 600;
+}
+
+.payout_button {
+    background-color: #4CAF50; 
+    color: #F7FFF7; 
+    padding: 14px 20px; 
+    margin: 8px 0; 
+    border: none; 
+    border-radius: 12px;
+    cursor: pointer; 
+    font-size: 18px; 
+    transition: background-color 0.3s ease, transform 0.3s ease; 
+    font-weight: 600;
+    font-size: 30px;
+    height: 180px;
+    width: 21%
+}
+
+.payout_button:hover {
+    background-color: #45a049; 
+}
+
+.payout_button:active {
+    background-color: #3e8e41; 
+    transform: scale(0.95); 
+}
+
+.payout_button:disabled {
+    background-color: #ccc; 
+    color: #888; 
+    cursor: not-allowed; 
+}
+
+@media screen and (max-width: 1200px) {
+    .main {
+        width: 800px;
+    }
+
+    .payout_button {
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .main {
+        width: 500px;
+    }
+
+    .text_container h3,
+    .text_container h4 {
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .main {
+        width: 420px;
+    }
+
+    .text_container h3,
+    .text_container h4 {
+        font-size: 18px;
+    }
+}
