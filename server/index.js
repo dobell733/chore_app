@@ -217,5 +217,5 @@ app.put("/chores/:kid_id/:chore_id/:chore_points", async (req, res) => {
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
-    console.log("server has started on port 5000");
+    console.log(`server has started on port ${port}`);
 })
