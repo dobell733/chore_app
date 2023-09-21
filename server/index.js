@@ -164,7 +164,7 @@ app.put("/chores/:kid_id/:chore_id/:chore_points", async (req, res) => {
           // CHANGE THIS IN PRODUCTION TO WHATEVER TIME YOU WANT //
           `UPDATE Kids_Chores
           SET is_locked = 1,
-            unlock_time = DATEADD(SECOND, 20, GETDATE())
+            unlock_time = DATEADD(HOUR, 24, GETDATE())
           WHERE kid_id = @param0 AND chore_id = @param1`,
           [kid_id, chore_id]
         );
