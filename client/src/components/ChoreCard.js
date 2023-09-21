@@ -73,11 +73,26 @@ function ChoreCard({ chore, kid_id, updatePoints }) {
     }
   };
 
+  const chore_emojis = {
+    "Fold and Put Away Clothes": '👕',
+    "Put Away Clothes": '👚',
+    "Make Your Bed": '🛏️',
+    "Sweep Hallway": '🧹',
+    "Wipe Down Surfaces": '🧽',
+    "Empty Trash": '🗑️',
+    "Wipe Door Handles": '🚪',
+    "Wash Your Dishes": '🍽️',
+    "Vacuum Your Room": '🧹',
+    "Put Away Toys / Clean Up Clutter": '🧸',
+    "Put Away Toys": '🧸',
+    "Feed Pets": '🐶',
+  };
+
   return (
     <div className='chore-card-exterior'>
       <div className='chore-card-interior'>
         <h5>
-          {buttonDisabled && !isPending ? '✔️' : ''}
+          {buttonDisabled && !isPending ? '✔️' : chore_emojis[choreState.name] || ''}
           {choreState.name}
         </h5>
         <p>Point Value: {choreState.points}</p>
