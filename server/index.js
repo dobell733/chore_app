@@ -135,6 +135,20 @@ app.put("/payout/:kid_id/:kid_name", async (req, res) => {
   }
 });
 
+const choreUnlockTimes = {
+  "Fold and Put Away Clothes": 168,
+  "Make Your Bed": 24,
+  "Sweep Hallway": 84,
+  "Wipe Down Surfaces": 168,
+  "Empty Trash": 168,
+  "Wipe Door Handles": 168,
+  "Wash Your Dishes": 24,
+  "Vacuum Your Room": 168,
+  "Put Away Toys / Clean Up Clutter": 48,
+  "Put Away Toys": 48,
+  "Feed Pets": 48,
+};
+
 // Route to complete a chore
 app.put("/chores/:kid_id/:chore_id/:chore_points", async (req, res) => {
   console.log("PUT request received for /chores/:kid_id/:chore_id"); // Log when the route is hit
@@ -144,11 +158,13 @@ app.put("/chores/:kid_id/:chore_id/:chore_points", async (req, res) => {
     console.log("Discord channel found"); // Log if the Discord channel is found
     const kid = await queryDB(`SELECT name FROM Kids WHERE kid_id = @param0`, [kid_id]);
     const chore = await queryDB(`SELECT chore_name FROM Chores WHERE chore_id = @param0`, [chore_id]);
-    const message = await channel.send(`${kid[0].name} completed "${chore[0].chore_name}". Confirm? (yes/no)`);
-    
+    const chore_name = chore[0].chore_name;
+    const message = await channel.send(`${kid[0].name} completed "${chore_name}". Confirm? (yes/no)`);
     // Log the message sent to Discord
     // console.log(`Message sent to Discord: ${kid[0].name} completed "${chore[0].chore_name}". Confirm? (yes/no)`);
-    
+
+    const unlockTime = choreUnlockTimes[chore_name] || 24; // Default to 24 hours if chore not found in mapping
+
     try {
       // Wait for a reply
       const filter = m => m.content.toLowerCase() === 'yes' || m.content.toLowerCase() === 'no';
@@ -164,9 +180,9 @@ app.put("/chores/:kid_id/:chore_id/:chore_points", async (req, res) => {
           // CHANGE THIS IN PRODUCTION TO WHATEVER TIME YOU WANT //
           `UPDATE Kids_Chores
           SET is_locked = 1,
-            unlock_time = DATEADD(HOUR, 24, GETDATE())
+            unlock_time = DATEADD(HOUR, @param2, GETDATE())
           WHERE kid_id = @param0 AND chore_id = @param1`,
-          [kid_id, chore_id]
+          [kid_id, chore_id, unlockTime]
         );
         // console.log("Database updated"); // Log if the database is updated
 

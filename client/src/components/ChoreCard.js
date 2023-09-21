@@ -7,25 +7,40 @@ function ChoreCard({ chore, kid_id, updatePoints }) {
   const [formattedTime, setFormattedTime] = useState('');
   const [isPending, setIsPending] = useState(false);
 
-  useEffect(() => {
-    const unlockTime = new Date(choreState.unlock_time);
-    const currentTime = new Date();
+  const formatTimeDifference = (unlockTime, currentTime) => {
+    const diffInMilliseconds = unlockTime - currentTime;
+    const diffInHours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor((diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
 
-    if (currentTime > unlockTime) {
-      setButtonDisabled(false);
+    if (diffInHours >= 24) {
+      return `${Math.floor(diffInHours / 24)} days ${diffInHours % 24} hours ${diffInMinutes} minutes`;
     } else {
-      setButtonDisabled(true);
-
-      // Calculate time 24 hours from now
-      unlockTime.setHours(unlockTime.getHours() + 24);
-
-      let hours = unlockTime.getHours();
-      const minutes = unlockTime.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'pm' : 'am';
-      hours = hours % 12 || 12;
-
-      setFormattedTime(`${hours}:${minutes}${ampm} tomorrow`);
+      return `${diffInHours} hours ${diffInMinutes} minutes`;
     }
+  };
+
+  useEffect(() => {
+    const updateLockStatus = () => {
+      const unlockTime = new Date(choreState.unlock_time);
+      const currentTime = new Date();
+
+      if (currentTime > unlockTime) {
+        setButtonDisabled(false);
+      } else {
+        setButtonDisabled(true);
+        const timeDifference = formatTimeDifference(unlockTime, currentTime);
+        setFormattedTime(`Locked for ${timeDifference}`);
+      }
+    };
+
+    // Update immediately
+    updateLockStatus();
+
+    // Update every minute
+    const intervalId = setInterval(updateLockStatus, 60000);
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
   }, [choreState]);
 
   const handleClick = async () => {
@@ -42,7 +57,7 @@ function ChoreCard({ chore, kid_id, updatePoints }) {
       const result = await response.json();
 
       if (result.status === 'confirmed') {
-        updatePoints(choreState.points); // updates the total points in the ChorePage component which causes a re-render of the PointCard component
+        updatePoints(choreState.points);
         setIsPending(false);
         setChoreState({
           ...choreState,
@@ -61,13 +76,13 @@ function ChoreCard({ chore, kid_id, updatePoints }) {
   return (
     <div className='chore-card-exterior'>
       <div className='chore-card-interior'>
-      <h5>
-        {buttonDisabled && !isPending ? '✔️' : ''}
-        {choreState.name}
-      </h5>
+        <h5>
+          {buttonDisabled && !isPending ? '✔️' : ''}
+          {choreState.name}
+        </h5>
         <p>Point Value: {choreState.points}</p>
-        {buttonDisabled && !isPending && <p>Locked until {formattedTime}</p>}
-        {isPending && <p>Waiting for confirmation...</p>} {/* New line */}
+        {buttonDisabled && !isPending && <p>{formattedTime}</p>}
+        {isPending && <p>Waiting for confirmation...</p>}
         <button className={buttonDisabled && !isPending ? 'chore_button disabled' : 'chore_button enabled'} onClick={handleClick} disabled={buttonDisabled || isPending}>Complete Chore</button>
       </div>
     </div>

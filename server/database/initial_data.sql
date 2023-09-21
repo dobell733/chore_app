@@ -30,7 +30,7 @@ INSERT INTO Kids (name, age, points) VALUES
 
 -- Insert data into Chores table
 INSERT INTO Chores (chore_name, point_value) VALUES
-('Put Away Toys', 100),
+('Put Away Toys', 100), -- Only for Reagan
 ('Fold and Put Away Clothes', 200),
 ('Make Your Bed', 50),
 ('Sweep Hallway', 50),
@@ -40,7 +40,8 @@ INSERT INTO Chores (chore_name, point_value) VALUES
 ('Put Away Clothes', 100),
 ('Wash Your Dishes', 50),
 ('Vacuum Your Room', 50),
-('Put Away Toys / Clean Up Clutter', 100);  -- New Chore
+('Put Away Toys / Clean Up Clutter', 100),  -- Added for Sawyer and Brooke
+('Feed Pets', 50);  -- Only for Reagan  
 
 -- Assign chores to Reagan
 INSERT INTO Kids_Chores (kid_id, chore_id, is_locked, unlock_time)
@@ -52,7 +53,8 @@ WHERE chore_name IN (
   'Sweep Hallway',
   'Empty Trash',
   'Wipe Door Handles',
-  'Put Away Clothes'
+  'Put Away Clothes',
+  'Feed Pets'
 );
 
 -- Assign chores to Sawyer and Brooke
