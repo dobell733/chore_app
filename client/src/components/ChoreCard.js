@@ -61,11 +61,10 @@ function ChoreCard({ chore, kid_id, updatePoints }) {
   return (
     <div className='chore-card-exterior'>
       <div className='chore-card-interior'>
-        <h5>{buttonDisabled && !isPending ? 
-                '✔️' : 
-                choreState.name.charAt(0)}
-                {choreState.name.slice(1)}
-        </h5>
+      <h5>
+        {buttonDisabled && !isPending ? '✔️' : ''}
+        {choreState.name}
+      </h5>
         <p>Point Value: {choreState.points}</p>
         {buttonDisabled && !isPending && <p>Locked until {formattedTime}</p>}
         {isPending && <p>Waiting for confirmation...</p>} {/* New line */}
