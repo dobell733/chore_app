@@ -4,7 +4,7 @@ import "./Footer.css";
 export default function Footer() {
   return (
     <footer>
-      <p>Made with ⌚ and ❤️ by Dad / Dominic (whatever you prefer)</p>
+      <p>Made with ⌚ and ❤️ by Dad</p>
     </footer>
   );
 }

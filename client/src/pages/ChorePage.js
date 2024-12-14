@@ -37,7 +37,7 @@ function ChorePage({ id, name }) {
 
   useEffect(() => {
     const apiEndpoint = `${process.env.REACT_APP_API_BASE_URL}/chores/${id}`;
-
+    
     fetch(apiEndpoint)
       .then((response) => response.json())
       .then((data) => {

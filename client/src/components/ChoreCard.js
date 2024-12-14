@@ -23,7 +23,7 @@ function ChoreCard({ chore, kid_id, updatePoints }) {
     const updateLockStatus = () => {
       const unlockTime = new Date(choreState.unlock_time);
       const currentTime = new Date();
-
+    
       if (currentTime > unlockTime) {
         setButtonDisabled(false);
       } else {
