@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "set NODE_ENV=development && node -r dotenv/config index.js dotenv_config_path=.env.local",
     "build": "npm i",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d postgres",
+    "db:logs": "docker compose logs -f postgres",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -15,9 +20,7 @@
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "mssql": "^10.0.1",
     "pg": "^8.13.1",
-    "postgres": "^3.3.5",
-    "twilio": "^4.17.0"
+    "postgres": "^3.3.5"
   }
 }
