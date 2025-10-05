@@ -1,20 +1,43 @@
 import { useState } from 'react';
 import './PinAuth.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 function PinAuth({ onAuthenticated }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const correctPin = process.env.REACT_APP_PARENT_PIN;
-    
-    if (pin === correctPin) {
-      setError('');
-      onAuthenticated();
-    } else {
-      setError('Incorrect PIN. Please try again.');
-      setPin('');
+    setError('');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/parent/auth/verify-pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin })
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setError('Incorrect PIN. Please try again.');
+          setPin('');
+          return;
+        }
+        throw new Error('Unable to verify PIN');
+      }
+
+      const data = await res.json();
+      if (data?.ok) {
+        setError('');
+        onAuthenticated();
+      } else {
+        setError('Incorrect PIN. Please try again.');
+        setPin('');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong. Please try again.');
     }
   };
 

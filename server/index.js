@@ -42,6 +42,27 @@ client.once(Events.ClientReady, c => {
 
 client.login(process.env.BOT_TOKEN);
 
+// Parent PIN verification (server-side)
+app.post("/parent/auth/verify-pin", (req, res) => {
+  try {
+    const { pin } = req.body || {};
+    const expected = process.env.PARENT_PIN;
+
+    if (!expected) {
+      return res.status(500).json({ error: "Server PIN is not configured" });
+    }
+
+    if (typeof pin === "string" && pin === expected) {
+      return res.json({ ok: true });
+    }
+
+    return res.status(401).json({ ok: false, error: "Invalid PIN" });
+  } catch (e) {
+    console.error("Error verifying PIN:", e);
+    return res.status(500).json({ error: "Unable to verify PIN" });
+  }
+});
+
 // ROUTES //
 // Get all child id's and names
 app.get("/children", async (req, res) => {
