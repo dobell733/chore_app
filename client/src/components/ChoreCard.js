@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './ChoreCard.css';
 
 function ChoreCard({ chore, kid_id, updatePoints }) {

@@ -1,7 +1,7 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 
-function Navbar() {
+function Navbar({ onHomeClick }) {
   return (
     <nav className="navbar">
       <div className="nav-flex-container">
@@ -9,7 +9,8 @@ function Navbar() {
           <h1>Chore App</h1>
         </div>
         <ul className="nav-links">
-          <li><a href="/">Home</a></li>
+          <li><Link to="/" onClick={onHomeClick}>Home</Link></li>
+          <li><Link to="/parent-dashboard">Parent Dashboard</Link></li>
         </ul>
       </div>
     </nav>

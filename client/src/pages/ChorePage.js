@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './ChorePage.css';
 import ChoreCard from '../components/ChoreCard';
 import PointCard from '../components/PointCard';
@@ -14,8 +14,8 @@ function ChorePage({ id, name }) {
       const container = document.querySelector('.chore_container');
       if (container) {
         const containerWidth = container.offsetWidth;
-        const itemWidth = 200; // Width of a single card (from your CSS)
-        const gap = 20; // Gap between cards (from your CSS)
+        const itemWidth = 200; // Width of a single card
+        const gap = 20; // Gap between cards
         const newItemsPerRow = Math.floor((containerWidth + gap) / (itemWidth + gap));
         setItemsPerRow(newItemsPerRow);
       }

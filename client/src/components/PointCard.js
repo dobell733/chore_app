@@ -1,4 +1,3 @@
-import React from 'react';
 import './PointCard.css'; 
 
 function PointCard({ kid_id, kid_name, totalPoints, updatePoints }) {

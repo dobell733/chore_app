@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ChildPage from './pages/ChildPage';
 import ChorePage from './pages/ChorePage';
+import ParentDashboardPage from './pages/ParentDashboardPage';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -17,20 +19,29 @@ function App() {
   };
 
   return (
-    <div className='app_container'>
-      <div className='nav'>
-        <Navbar />
+    <Router>
+      <div className='app_container'>
+        <div className='nav'>
+          <Navbar onHomeClick={() => { setShowChorePage(false); setChild({}); }} />
+        </div>
+        <div className='content'>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                showChorePage ? 
+                  <ChorePage id={child.id} name={child.name} /> : 
+                  <ChildPage onChildClick={handleChildClick} />
+              } 
+            />
+            <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
+          </Routes>
+        </div>
+        <div className='footer'>
+            <Footer />
+        </div>
       </div>
-      <div className='content'>
-        {showChorePage ? 
-          <ChorePage id={child.id} name={child.name} /> : 
-          <ChildPage onChildClick={handleChildClick} /> 
-        }
-      </div>
-      <div className='footer'>
-          <Footer />
-      </div>
-    </div>
+    </Router>
   );
 }
 

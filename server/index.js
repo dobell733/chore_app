@@ -8,6 +8,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',') 
   : ['http://localhost:3000'];
 
+const port = process.env.PORT || 5000;
+
 const corsOptions = {
   origin: function (origin, callback) {
     if (allowedOrigins.includes(origin) || !origin) {
@@ -25,14 +27,20 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json()); // req.body
 
+// Initialize Discord bot
 const client = new Client({
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-    ]
-  });
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ]
+});
 
+client.once(Events.ClientReady, c => {
+    console.log(`Ready! Logged in as ${c.user.tag}`);
+});
+
+client.login(process.env.BOT_TOKEN);
 
 // ROUTES //
 // Get all child id's and names
@@ -81,13 +89,6 @@ app.get("/chores/:id", async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-// Initialize Discord bot
-client.once(Events.ClientReady, c => {
-    console.log(`Ready! Logged in as ${c.user.tag}`);
-});
-
-client.login(process.env.BOT_TOKEN);
 
 // Payout and reset points
 app.put("/payout/:kid_id/:kid_name", async (req, res) => {
@@ -194,7 +195,273 @@ app.put("/chores/:kid_id/:chore_id/:chore_points", async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 5000;
+const toBoolean = (value, defaultValue = false) => {
+  if (value === undefined || value === null) {
+    return defaultValue;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value !== 0;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y'].includes(normalized)) {
+      return true;
+    }
+    if (['false', '0', 'no', 'n'].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return defaultValue;
+};
+
+const toPositiveInteger = (value) => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return null;
+  }
+  return parsed;
+};
+
+// Parent dashboard management endpoints
+app.get("/parent/children-with-chores", async (req, res) => {
+  try {
+    const kids = await queryDB(
+      `SELECT kid_id, name, age, points
+       FROM Kids
+       ORDER BY name`
+    );
+
+    const chores = await queryDB(
+      `SELECT
+          KC.kids_chore_id,
+          KC.kid_id,
+          KC.chore_id,
+          KC.is_locked,
+          KC.unlock_time,
+          C.chore_name,
+          C.point_value
+        FROM Kids_Chores AS KC
+        INNER JOIN Chores AS C ON KC.chore_id = C.chore_id
+        ORDER BY KC.kid_id, C.chore_name`
+    );
+
+    const data = kids.map((kid) => {
+      const kidChores = chores
+        .filter((chore) => chore.kid_id === kid.kid_id)
+        .map((chore) => ({
+          kidsChoreId: chore.kids_chore_id,
+          choreId: chore.chore_id,
+          name: chore.chore_name,
+          pointValue: chore.point_value,
+          isLocked: chore.is_locked,
+          unlockTime: chore.unlock_time,
+        }));
+
+      return {
+        id: kid.kid_id,
+        name: kid.name,
+        age: kid.age,
+        points: kid.points,
+        chores: kidChores,
+      };
+    });
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching parent dashboard data:", error);
+    res.status(500).json({ error: "Unable to fetch parent dashboard data" });
+  }
+});
+
+app.post("/parent/kids/:kidId/chores", async (req, res) => {
+  const { kidId } = req.params;
+  const { name, pointValue, isLocked } = req.body;
+
+  const trimmedName = typeof name === "string" ? name.trim() : "";
+  const parsedPoints = toPositiveInteger(pointValue);
+  const locked = toBoolean(isLocked, false);
+
+  if (!trimmedName) {
+    return res.status(400).json({ error: "Chore name is required" });
+  }
+
+  if (parsedPoints === null) {
+    return res.status(400).json({ error: "Point value must be a non-negative integer" });
+  }
+
+  try {
+    const kidExists = await queryDB(
+      `SELECT kid_id FROM Kids WHERE kid_id = $1`,
+      [kidId]
+    );
+
+    if (kidExists.length === 0) {
+      return res.status(404).json({ error: "Kid not found" });
+    }
+
+    const newChore = await queryDB(
+      `INSERT INTO Chores (chore_name, point_value)
+       VALUES ($1, $2)
+       RETURNING chore_id, chore_name, point_value`,
+      [trimmedName, parsedPoints]
+    );
+
+    const choreId = newChore[0].chore_id;
+
+    const assignment = await queryDB(
+      `INSERT INTO Kids_Chores (kid_id, chore_id, is_locked)
+       VALUES ($1, $2, $3)
+       RETURNING kids_chore_id, kid_id, is_locked, unlock_time`,
+      [kidId, choreId, locked]
+    );
+
+    const created = {
+      kidsChoreId: assignment[0].kids_chore_id,
+      choreId,
+      name: newChore[0].chore_name,
+      pointValue: newChore[0].point_value,
+      isLocked: assignment[0].is_locked,
+      unlockTime: assignment[0].unlock_time,
+    };
+
+    res.status(201).json(created);
+  } catch (error) {
+    console.error("Error creating chore:", error);
+    res.status(500).json({ error: "Unable to create chore" });
+  }
+});
+
+app.put("/parent/kids/:kidId/chores/:kidsChoreId", async (req, res) => {
+  const { kidId, kidsChoreId } = req.params;
+  const { name, pointValue, isLocked } = req.body;
+
+  const trimmedName = typeof name === "string" ? name.trim() : "";
+  const parsedPoints = toPositiveInteger(pointValue);
+  const locked = toBoolean(isLocked, false);
+
+  if (!trimmedName) {
+    return res.status(400).json({ error: "Chore name is required" });
+  }
+
+  if (parsedPoints === null) {
+    return res.status(400).json({ error: "Point value must be a non-negative integer" });
+  }
+
+  try {
+    const assignments = await queryDB(
+      `SELECT kid_id, chore_id
+       FROM Kids_Chores
+       WHERE kids_chore_id = $1`,
+      [kidsChoreId]
+    );
+
+    if (assignments.length === 0) {
+      return res.status(404).json({ error: "Chore assignment not found" });
+    }
+
+    const assignment = assignments[0];
+
+    if (assignment.kid_id !== Number.parseInt(kidId, 10)) {
+      return res.status(400).json({ error: "Chore does not belong to this kid" });
+    }
+
+    const updatedChore = await queryDB(
+      `UPDATE Chores
+       SET chore_name = $1,
+           point_value = $2
+       WHERE chore_id = $3
+       RETURNING chore_id, chore_name, point_value`,
+      [trimmedName, parsedPoints, assignment.chore_id]
+    );
+
+    await queryDB(
+      `UPDATE Kids_Chores
+       SET is_locked = $1,
+           unlock_time = CASE WHEN $1 = false THEN NULL ELSE unlock_time END
+       WHERE kids_chore_id = $2`,
+      [locked, kidsChoreId]
+    );
+
+    const refreshedAssignment = await queryDB(
+      `SELECT kids_chore_id, kid_id, is_locked, unlock_time
+       FROM Kids_Chores
+       WHERE kids_chore_id = $1`,
+      [kidsChoreId]
+    );
+
+    const responsePayload = {
+      kidsChoreId: refreshedAssignment[0].kids_chore_id,
+      choreId: updatedChore[0].chore_id,
+      name: updatedChore[0].chore_name,
+      pointValue: updatedChore[0].point_value,
+      isLocked: refreshedAssignment[0].is_locked,
+      unlockTime: refreshedAssignment[0].unlock_time,
+    };
+
+    res.json(responsePayload);
+  } catch (error) {
+    console.error("Error updating chore:", error);
+    res.status(500).json({ error: "Unable to update chore" });
+  }
+});
+
+app.delete("/parent/kids/:kidId/chores/:kidsChoreId", async (req, res) => {
+  const { kidId, kidsChoreId } = req.params;
+
+  try {
+    const assignments = await queryDB(
+      `SELECT kid_id, chore_id
+       FROM Kids_Chores
+       WHERE kids_chore_id = $1`,
+      [kidsChoreId]
+    );
+
+    if (assignments.length === 0) {
+      return res.status(404).json({ error: "Chore assignment not found" });
+    }
+
+    const assignment = assignments[0];
+
+    if (assignment.kid_id !== Number.parseInt(kidId, 10)) {
+      return res.status(400).json({ error: "Chore does not belong to this kid" });
+    }
+
+    await queryDB(
+      `DELETE FROM Kids_Chores
+       WHERE kids_chore_id = $1`,
+      [kidsChoreId]
+    );
+
+    const remainingAssignments = await queryDB(
+      `SELECT COUNT(*)
+       FROM Kids_Chores
+       WHERE chore_id = $1`,
+      [assignment.chore_id]
+    );
+
+    const remainingCount = Number.parseInt(remainingAssignments[0].count, 10);
+
+    if (remainingCount === 0) {
+      await queryDB(
+        `DELETE FROM Chores
+         WHERE chore_id = $1`,
+        [assignment.chore_id]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting chore:", error);
+    res.status(500).json({ error: "Unable to delete chore" });
+  }
+});
 
 app.listen(port, () => {
     console.log(`server has started on port ${port}`);
